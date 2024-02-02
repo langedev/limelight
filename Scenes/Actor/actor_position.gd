@@ -8,9 +8,9 @@ const FACE_LEFT = true
 
 enum KeyDirections {STAY, MOVE_RIGHT, MOVE_LEFT, TURN_RIGHT, TURN_LEFT}
 
-var tilemap: TileMap:
-	set(new_tilemap): tilemap = new_tilemap
-var _prev_dir := Vector2.ZERO
+var stage: Stage:
+	set(new_stage): stage = new_stage
+var _prev_dir: Stage.StageDir = Stage.StageDir.NULL
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -45,36 +45,35 @@ func _get_move_key_input(delta: float) -> KeyDirections:
 func _move(key_state: KeyDirections) -> void:
 	match key_state:
 		KeyDirections.MOVE_LEFT:
-			if (sprite.is_moving() and _prev_dir == Vector2.RIGHT) or \
+			if (sprite.is_moving() and _prev_dir == Stage.StageDir.RIGHT) or \
 					(not sprite.is_moving()):
 				sprite.flip(FACE_LEFT)
-				_move_tile(Vector2.LEFT)
+				_move_tile(stage.StageDir.LEFT)
 		KeyDirections.MOVE_RIGHT:
-			if (sprite.is_moving() and _prev_dir == Vector2.LEFT) or \
+			if (sprite.is_moving() and _prev_dir == Stage.StageDir.LEFT) or \
 					(not sprite.is_moving()):
 				sprite.flip(FACE_RIGHT)
-				_move_tile(Vector2.RIGHT)
+				_move_tile(stage.StageDir.RIGHT)
 		KeyDirections.TURN_LEFT:
 			sprite.flip(FACE_LEFT)
 		KeyDirections.TURN_RIGHT:
 			sprite.flip(FACE_RIGHT)
 
-func force_move(tilemap_position: Vector2) -> void:
-	var new_position := tilemap.map_to_local(tilemap_position)
+func force_move(stage_position: int) -> void:
+	var new_position := stage.stage_to_local(stage_position)
 	global_position = new_position
 	sprite.start_moving_smoothly(new_position, new_position)
 
-func _move_tile(direction: Vector2) -> void:
-	_prev_dir = direction.normalized()
-	var current_tile: Vector2i = tilemap.local_to_map(global_position)
-	var target_tile: Vector2i = Vector2(
-		current_tile.x + direction.x,
-		current_tile.y + direction.y
-	)
+func _move_tile(direction: int) -> void:
+	_prev_dir = direction / abs(direction)
+	var current_pos: int = stage.local_to_stage(global_position)
+	var target_pos: int = current_pos + direction
 
-	global_position = tilemap.map_to_local(target_tile)
+	prints(current_pos, target_pos)
+
+	global_position = stage.stage_to_local(target_pos)
 	if sprite.is_moving():
-		sprite.start_moving_smoothly(tilemap.map_to_local(target_tile))
+		sprite.start_moving_smoothly(stage.stage_to_local(target_pos))
 	else:
-		sprite.start_moving_smoothly(tilemap.map_to_local(target_tile), \
-			tilemap.map_to_local(current_tile))
+		sprite.start_moving_smoothly(stage.stage_to_local(target_pos), \
+			stage.stage_to_local(current_pos))

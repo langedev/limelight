@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://c33pk1eyyopjp"]
 
 [ext_resource type="Script" path="res://Scenes/Actor/actor.gd" id="1_cmiy5"]
-[ext_resource type="Texture2D" uid="uid://6seiydnon4sf" path="res://Assets/kirbyPancake.jpg" id="2_k2hm3"]
+[ext_resource type="Texture2D" uid="uid://bb8aa6upspq35" path="res://Assets/icon.svg" id="2_w2bo3"]
 [ext_resource type="Script" path="res://Scenes/Actor/actor_sprite.gd" id="3_f7ov6"]
 [ext_resource type="Script" path="res://Scenes/Actor/actor_position.gd" id="3_qkldl"]
 
@@ -10,10 +10,8 @@ script = ExtResource("1_cmiy5")
 positionNode = NodePath("ActorPosition")
 
 [node name="ActorSprite" type="Sprite2D" parent="."]
-scale = Vector2(0.1, 0.1)
-texture = ExtResource("2_k2hm3")
+texture = ExtResource("2_w2bo3")
 script = ExtResource("3_f7ov6")
-_default_flip = true
 _speed = 300
 
 [node name="ActorPosition" type="Node2D" parent="." node_paths=PackedStringArray("sprite")]
