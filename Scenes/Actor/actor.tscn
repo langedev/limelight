@@ -13,6 +13,8 @@ positionNode = NodePath("ActorPosition")
 texture = ExtResource("2_w2bo3")
 script = ExtResource("3_f7ov6")
 _speed = 300
+_bobbing_rate = 100
+_bobbing_height = 10
 
 [node name="ActorPosition" type="Node2D" parent="." node_paths=PackedStringArray("sprite")]
 script = ExtResource("3_qkldl")

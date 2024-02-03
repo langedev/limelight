@@ -17,7 +17,7 @@ func init_stage_pos():
 	_stage_position = stage.get_stage_position()
 	var new_position := stage.stage_to_local(_stage_position)
 	global_position = new_position
-	sprite.start_moving_smoothly(new_position, new_position)
+	sprite.set_start_pos(new_position)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
