@@ -4,4 +4,4 @@ class_name Actor extends Node2D
 
 func set_stage(stage: Stage):
 	positionNode.stage = stage
-	positionNode.force_move(0)
+	positionNode.init_stage_pos()

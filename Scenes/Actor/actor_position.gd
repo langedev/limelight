@@ -4,76 +4,87 @@ const FACE_RIGHT = false
 const FACE_LEFT = true
 
 @export var move_time := 0.3
-@export var sprite: Sprite2D
+@export var sprite: ActorSprite
 
-enum KeyDirections {STAY, MOVE_RIGHT, MOVE_LEFT, TURN_RIGHT, TURN_LEFT}
+enum Move {STAY, LEFT, RIGHT}
+enum Turn {STAY, LEFT, RIGHT}
 
 var stage: Stage:
 	set(new_stage): stage = new_stage
-var _prev_dir: Stage.StageDir = Stage.StageDir.NULL
+var _stage_position: Stage.StagePosition
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	var move_key_state = _get_move_key_input(delta)
-	_move(move_key_state)
-
-var right_key_time := 0.0
-var left_key_time := 0.0
-func _get_move_key_input(delta: float) -> KeyDirections:
-	if Input.is_action_pressed("move_right"):
-		left_key_time = 0
-		right_key_time += delta
-	if Input.is_action_just_released("move_right"):
-		right_key_time = 0
-
-	if Input.is_action_pressed("move_left"):
-		right_key_time = 0
-		left_key_time += delta
-	if Input.is_action_just_released("move_left"):
-		left_key_time = 0
-
-	if right_key_time >= move_time:
-		return KeyDirections.MOVE_RIGHT
-	if left_key_time >= move_time:
-		return KeyDirections.MOVE_LEFT
-	if right_key_time == 0:
-		if left_key_time == 0:
-			return KeyDirections.STAY
-		return KeyDirections.TURN_LEFT
-	return KeyDirections.TURN_RIGHT
-
-func _move(key_state: KeyDirections) -> void:
-	match key_state:
-		KeyDirections.MOVE_LEFT:
-			if (sprite.is_moving() and _prev_dir == Stage.StageDir.RIGHT) or \
-					(not sprite.is_moving()):
-				sprite.flip(FACE_LEFT)
-				_move_tile(stage.StageDir.LEFT)
-		KeyDirections.MOVE_RIGHT:
-			if (sprite.is_moving() and _prev_dir == Stage.StageDir.LEFT) or \
-					(not sprite.is_moving()):
-				sprite.flip(FACE_RIGHT)
-				_move_tile(stage.StageDir.RIGHT)
-		KeyDirections.TURN_LEFT:
-			sprite.flip(FACE_LEFT)
-		KeyDirections.TURN_RIGHT:
-			sprite.flip(FACE_RIGHT)
-
-func force_move(stage_position: int) -> void:
-	var new_position := stage.stage_to_local(stage_position)
+func init_stage_pos():
+	_stage_position = stage.get_stage_position()
+	var new_position := stage.stage_to_local(_stage_position)
 	global_position = new_position
 	sprite.start_moving_smoothly(new_position, new_position)
 
-func _move_tile(direction: int) -> void:
-	_prev_dir = direction / abs(direction)
-	var current_pos: int = stage.local_to_stage(global_position)
-	var target_pos: int = current_pos + direction
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	var move_key_state := _get_move_key_input(delta)
+	if move_key_state.x != Move.STAY or move_key_state.y != Turn.STAY:
+		_move(move_key_state.x, move_key_state.y)
 
-	prints(current_pos, target_pos)
+func _move(move: Move, turn: Turn) -> void:
+	match turn:
+		Turn.LEFT:
+			sprite.flip(FACE_LEFT)
+		Turn.RIGHT:
+			sprite.flip(FACE_RIGHT)
 
-	global_position = stage.stage_to_local(target_pos)
-	if sprite.is_moving():
-		sprite.start_moving_smoothly(stage.stage_to_local(target_pos))
+	var wrapping := false
+	match move:
+		Move.LEFT:
+			if (sprite.is_moving() and _stage_position.previous_movement()) or \
+					(not sprite.is_moving()):
+				wrapping = _stage_position.decrement_position()
+				_update_position(wrapping, move)
+		Move.RIGHT:
+			if (sprite.is_moving() and not _stage_position.previous_movement()) or \
+					(not sprite.is_moving()):
+				wrapping = _stage_position.increment_position()
+				_update_position(wrapping, move)
+
+func _update_position(wrapping: bool, move: Move) -> void:
+	global_position = stage.stage_to_local(_stage_position)
+	if wrapping:
+		match move:
+			Move.LEFT:
+				sprite.move_onstage_right(stage.get_onstage_right(), \
+						stage.get_offstage_right())
+			Move.RIGHT:
+				sprite.move_offstage_right(stage.get_offstage_left(), \
+						stage.get_offstage_right())
 	else:
-		sprite.start_moving_smoothly(stage.stage_to_local(target_pos), \
-			stage.stage_to_local(current_pos))
+		sprite.start_moving_smoothly(global_position)
+
+var _right_key_time := 0.0
+var _left_key_time := 0.0
+func _get_move_key_input(delta: float) -> Vector2i:
+	if Input.is_action_pressed("move_right"):
+		_left_key_time = 0
+		_right_key_time += delta
+	if Input.is_action_just_released("move_right"):
+		_right_key_time = 0
+
+	if Input.is_action_pressed("move_left"):
+		_right_key_time = 0
+		_left_key_time += delta
+	if Input.is_action_just_released("move_left"):
+		_left_key_time = 0
+
+	var output := Vector2i(Move.STAY, Turn.STAY)
+
+	if _right_key_time >= move_time:
+		output.x = Move.RIGHT
+		output.y = Turn.RIGHT
+	elif _right_key_time != 0:
+		output.y = Turn.RIGHT
+
+	if _left_key_time >= move_time:
+		output.x = Move.LEFT
+		output.y = Turn.LEFT
+	elif _left_key_time != 0:
+		output.y = Turn.LEFT
+
+	return output
