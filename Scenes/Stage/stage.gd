@@ -38,7 +38,7 @@ class StagePosition:
 	var _prev_pos := false
 	var _divisions: int
 
-	func _init(divisions, position = -1):
+	func _init(divisions, position = 0):
 		_divisions = divisions
 		_position = position
 
