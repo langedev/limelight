@@ -1,20 +1,57 @@
-[gd_scene load_steps=5 format=3 uid="uid://c33pk1eyyopjp"]
+[gd_scene load_steps=10 format=3 uid="uid://c33pk1eyyopjp"]
 
 [ext_resource type="Script" path="res://Scenes/Actor/actor.gd" id="1_cmiy5"]
-[ext_resource type="Texture2D" uid="uid://bb8aa6upspq35" path="res://Assets/icon.svg" id="2_w2bo3"]
+[ext_resource type="Texture2D" uid="uid://bjx3gndgg7r34" path="res://Assets/defaultbody.png" id="2_qa1iq"]
 [ext_resource type="Script" path="res://Scenes/Actor/actor_sprite.gd" id="3_f7ov6"]
 [ext_resource type="Script" path="res://Scenes/Actor/actor_position.gd" id="3_qkldl"]
+[ext_resource type="Texture2D" uid="uid://s10gmkpkw35i" path="res://Assets/defaultmouths.png" id="4_pyms1"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_84mxc"]
+atlas = ExtResource("4_pyms1")
+region = Rect2(33, 0, 33, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cab51"]
+atlas = ExtResource("4_pyms1")
+region = Rect2(0, 0, 33, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wwfoy"]
+atlas = ExtResource("4_pyms1")
+region = Rect2(66, 0, 33, 30)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_lh6j3"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_84mxc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cab51")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wwfoy")
+}],
+"loop": true,
+"name": &"default",
+"speed": 7.0
+}]
 
 [node name="Actor" type="Node2D" node_paths=PackedStringArray("positionNode")]
 script = ExtResource("1_cmiy5")
 positionNode = NodePath("ActorPosition")
 
-[node name="ActorSprite" type="Sprite2D" parent="."]
-texture = ExtResource("2_w2bo3")
+[node name="ActorSprite" type="Sprite2D" parent="." node_paths=PackedStringArray("_mouth")]
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("2_qa1iq")
 script = ExtResource("3_f7ov6")
+_default_flip = true
 _speed = 300
 _bobbing_rate = 100
 _bobbing_height = 10
+_mouth = NodePath("Mouth")
+
+[node name="Mouth" type="AnimatedSprite2D" parent="ActorSprite"]
+position = Vector2(0, 12)
+sprite_frames = SubResource("SpriteFrames_lh6j3")
 
 [node name="ActorPosition" type="Node2D" parent="." node_paths=PackedStringArray("sprite")]
 script = ExtResource("3_qkldl")

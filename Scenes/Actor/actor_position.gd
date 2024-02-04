@@ -24,6 +24,9 @@ func _process(delta: float) -> void:
 	var move_key_state := _get_move_key_input(delta)
 	if move_key_state.x != Move.STAY or move_key_state.y != Turn.STAY:
 		_move(move_key_state.x, move_key_state.y)
+	var speaking := _get_speech_key_input()
+	if speaking:
+		sprite.toggle_speaking()
 
 func _move(move: Move, turn: Turn) -> void:
 	match turn:
@@ -88,3 +91,10 @@ func _get_move_key_input(delta: float) -> Vector2i:
 		output.y = Turn.LEFT
 
 	return output
+
+func _get_speech_key_input() -> bool:
+	if Input.is_action_just_pressed("speak"):
+		return true
+	if Input.is_action_just_released("speak"):
+		return true
+	return false
